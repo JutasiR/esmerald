@@ -467,7 +467,7 @@ class BaseRouter(StarletteRouter):
             ),
         ] = None,
     ):
-        self.app = app
+        self._app = app
         if not path:
             path = "/"
         else:
@@ -507,11 +507,10 @@ class BaseRouter(StarletteRouter):
             default=default,
             lifespan=self.esmerald_lifespan,
         )
-
         self.path = path
         self.on_startup = [] if on_startup is None else list(on_startup)
         self.on_shutdown = [] if on_shutdown is None else list(on_shutdown)
-        self.parent: Optional["ParentType"] = parent or self.app
+        self.parent: Optional["ParentType"] = parent or self._app
         self.dependencies = dependencies or {}
         self.exception_handlers = exception_handlers or {}
         self.interceptors: Sequence["Interceptor"] = interceptors or []
