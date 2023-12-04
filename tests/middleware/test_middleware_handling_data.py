@@ -88,9 +88,9 @@ def test_setting_cors_middleware() -> None:
         cur = client.app.router
 
         while hasattr(cur, "app"):
-            unpacked_middleware.extend(cur.app.user_middleware)
-            _ids.append(id(cur.app.user_middleware))
-            cur = cast("Any", cur.app)  # type: ignore
+            unpacked_middleware.extend(cur._app.user_middleware)
+            _ids.append(id(cur._app.user_middleware))
+            cur = cast("Any", cur._app)  # type: ignore
 
         assert len(unpacked_middleware) == 2
         cors_middleware = cast("Any", unpacked_middleware[1])
@@ -110,9 +110,9 @@ def test_trusted_hosts_middleware() -> None:
     cur = client.app.router
 
     while hasattr(cur, "app"):
-        unpacked_middleware.extend(cur.app.user_middleware)
-        _ids.append(id(cur.app.user_middleware))
-        cur = cast("Any", cur.app)  # type: ignore
+        unpacked_middleware.extend(cur._app.user_middleware)
+        _ids.append(id(cur._app.user_middleware))
+        cur = cast("Any", cur._app)  # type: ignore
 
     assert len(unpacked_middleware) == 1
     trusted_hosts_middleware = cast("Any", unpacked_middleware[0])
