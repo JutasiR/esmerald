@@ -295,7 +295,9 @@ class OpenAPIConfig(BaseModel):
         Optional[str],
         Doc(
             """
-            String default relative URL where the Stoplight documentation
+            String default relative URL where the- OpenAPI `contact` it was not parsing properly on transformation.
+- `include_in_schema` parameter from `Param` was called `include`.
+- Missing `nest_asyncio` dependency when using `esmerald shell`. Stoplight documentation
             shall be accessed in the application.
 
             Example: `/docs/elements`.
@@ -355,8 +357,7 @@ class OpenAPIConfig(BaseModel):
 
             @get(path=self.openapi_url)
             async def _openapi(request: Request) -> JSONResponse:
-                root_path = request.scope.get("root_path", "").rstrip("/")
-
+                root_path = request.scope.get("route_root_path", "").rstrip("/")
                 if root_path not in server_urls:
                     if root_path and self.root_path_in_servers:
                         self.servers.insert(0, {"url": root_path})

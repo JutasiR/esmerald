@@ -2490,8 +2490,9 @@ class Esmerald(Starlette):
         if scope["type"] == "lifespan":
             await self.router.lifespan(scope, receive, send)
             return
+
         if self.root_path:
-            scope["app_root_path"] = self.root_path
+            scope["route_root_path"] = self.root_path
         scope["state"] = {}
         await super().__call__(scope, receive, send)
 
