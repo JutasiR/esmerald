@@ -27,7 +27,7 @@ from starlette.requests import HTTPConnection
 from starlette.responses import JSONResponse
 from starlette.responses import Response as StarletteResponse
 from starlette.routing import BaseRoute as StarletteBaseRoute
-from starlette.routing import Host, Match, Mount, NoMatchFound
+from starlette.routing import Host, Mount, NoMatchFound
 from starlette.routing import Route as StarletteRoute
 from starlette.routing import Router as StarletteRouter
 from starlette.routing import WebSocketRoute as StarletteWebSocketRoute
@@ -467,6 +467,7 @@ class BaseRouter(StarletteRouter):
             ),
         ] = None,
     ):
+        self._app = app
         if not path:
             path = "/"
         else:
@@ -2022,15 +2023,3 @@ class Include(Mount):
 
                     routing.append(gate)
         return routing
-
-    def xmatches(self, scope: Scope) -> Tuple[Match, Scope]:
-        match, child_scope = super().matches(scope)
-
-        if not child_scope:
-            return match, child_scope
-
-        if "root_path" in scope:
-            child_scope["root_path"] = child_scope["route_root_path"]
-        if "path" not in child_scope:
-            child_scope["path"] = child_scope["route_path"]
-        return match, child_scope

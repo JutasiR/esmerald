@@ -22,14 +22,14 @@ async def home(request: Request) -> dict:
 
 def test_serve_flask_via_esmerald(test_client_factory):
     routes = [
-        # Gateway(handler=home),
+        Gateway(handler=home),
         Include("/flask", WSGIMiddleware(flask_app)),
     ]
 
     with create_client(routes=routes, enable_openapi=False) as client:
-        # response = client.get("/home/esmerald")
-        # assert response.status_code == 200
-        # assert response.json() == {"name": "esmerald"}
+        response = client.get("/home/esmerald")
+        assert response.status_code == 200
+        assert response.json() == {"name": "esmerald"}
 
         response = client.get("/flask")
         assert response.status_code == 200
