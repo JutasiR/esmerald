@@ -1205,10 +1205,7 @@ class HTTPHandler(BaseHandlerMixin, FieldInfoMixin, StarletteRoute):
         )
         await response(scope, receive, send)
 
-    def __call__(
-        self,
-        fn: "AnyCallable",
-    ) -> "HTTPHandler":
+    def __call__(self, fn: "AnyCallable") -> "HTTPHandler":
         self.fn = fn
         self.endpoint = fn
         self.validate_handler()
