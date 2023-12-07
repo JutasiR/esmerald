@@ -1585,6 +1585,7 @@ class Esmerald(Starlette):
             deprecated=deprecated,
             security=security,
             redirect_slashes=self.redirect_slashes,
+            root_path=self.root_path,
         )
 
         self.get_default_exception_handlers()
@@ -2485,14 +2486,26 @@ class Esmerald(Starlette):
         """
         return esmerald_settings
 
+    async def build_include_scope(self, scope: Scope) -> Scope:
+        """
+        Builds the scope for a specific mounted application.
+        """
+        if "route_root_path" in scope:
+            if "root_include_path" not in scope:
+                scope["root_include_path"] = scope["route_root_path"]
+        return scope
+
     async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
-        scope["app"] = self
         if scope["type"] == "lifespan":
             await self.router.lifespan(scope, receive, send)
             return
 
+        scope["app"] = self
+        scope = await self.build_include_scope(scope=scope)
+
         if self.root_path:
-            scope["route_root_path"] = self.root_path
+            scope["root_path"] = self.root_path
+
         scope["state"] = {}
         await super().__call__(scope, receive, send)
 

@@ -106,6 +106,7 @@ class BaseRouter(StarletteRouter):
         "security",
         "on_startup",
         "on_shutdown",
+        "root_path",
     )
 
     def __init__(
@@ -466,6 +467,25 @@ class BaseRouter(StarletteRouter):
                 """
             ),
         ] = None,
+        root_path: Annotated[
+            Optional[str],
+            Doc(
+                """
+                A path prefix that is handled by a proxy not seen in the
+                application but seen by external libraries.
+
+                This affects the tools like the OpenAPI documentation.
+
+                **Example^^
+
+                ```python
+                from esmerald import Esmerald
+
+                app = Esmerald(root_path="/api/v3")
+                ```
+                """
+            ),
+        ] = None,
     ):
         self._app = app
         if not path:
@@ -524,6 +544,7 @@ class BaseRouter(StarletteRouter):
         self.response_headers = response_headers or {}
         self.deprecated = deprecated
         self.security = security or []
+        self.root_path = root_path
 
         self.routing = copy(self.routes)
         for route in self.routing or []:
@@ -544,6 +565,14 @@ class BaseRouter(StarletteRouter):
 
     def activate(self) -> None:
         self.routes = self.reorder_routes()
+
+    async def app(self, scope: Scope, receive: Receive, send: Send) -> None:
+        """
+        Checks if a root_path is provided
+        """
+        if self.root_path:
+            scope["root_path"] = self.root_path
+        await super().app(scope, receive, send)
 
     async def not_found(
         self, scope: "Scope", receive: "Receive", send: "Send"
@@ -633,6 +662,7 @@ class BaseRouter(StarletteRouter):
         """
         # Getting the value of the router for the path
         value.path = clean_path(self.path + getattr(value, "path", "/"))
+
         if isinstance(value, (Include, Gateway, WebSocketGateway, WebSocketGateway)):
             if not value.parent and not override:
                 value.parent = cast("Union[Router, Include, Gateway, WebSocketGateway]", self)
@@ -1868,7 +1898,6 @@ class Include(Mount):
         if namespace:
             routes = include(namespace, pattern)
 
-        self.app = app
         self.name = name
         self.namespace = namespace
         self.pattern = pattern
@@ -1900,11 +1929,11 @@ class Include(Mount):
                     StarletteMiddleware(cast("Type[StarletteMiddleware]", _middleware))
                 )
 
-        app = self.resolve_app_parent(app=app)
+        self.app = self.resolve_app_parent(app=app)
 
         super().__init__(
             self.path,
-            app=app,
+            app=self.app,
             routes=routes,
             name=name,
             middleware=include_middleware,

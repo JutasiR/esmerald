@@ -357,11 +357,14 @@ class OpenAPIConfig(BaseModel):
 
             @get(path=self.openapi_url)
             async def _openapi(request: Request) -> JSONResponse:
+                root_include_path = request.scope.get("root_include_path", "").rstrip("/")
                 root_path = request.scope.get("route_root_path", "").rstrip("/")
-                if root_path not in server_urls:
-                    if root_path and self.root_path_in_servers:
-                        self.servers.insert(0, {"url": root_path})
-                        server_urls.add(root_path)
+
+                path = root_include_path + root_path
+                if path not in server_urls:
+                    if path and self.root_path_in_servers:
+                        self.servers.insert(0, {"url": path})
+                        server_urls.add(path)
                 return JSONResponse(self.openapi(app))
 
             app.add_route(
