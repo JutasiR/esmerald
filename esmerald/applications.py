@@ -1585,7 +1585,6 @@ class Esmerald(Starlette):
             deprecated=deprecated,
             security=security,
             redirect_slashes=self.redirect_slashes,
-            root_path=self.root_path,
         )
 
         self.get_default_exception_handlers()
