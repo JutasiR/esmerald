@@ -1,7 +1,6 @@
 from typing import Any, Dict, List, Optional, Sequence, Union
 
 from openapi_schemas_pydantic.v3_1_0.security_scheme import SecurityScheme
-from orjson import loads
 from pydantic import AnyUrl, BaseModel
 from typing_extensions import Annotated, Doc
 
